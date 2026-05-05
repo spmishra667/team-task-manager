@@ -28,6 +28,11 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getProjectTasks(projectId));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskResponse> getOne(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.getOne(id));
+    }
+
     @GetMapping("/my-tasks")
     public ResponseEntity<List<TaskResponse>> myTasks() {
         return ResponseEntity.ok(taskService.myTasks());

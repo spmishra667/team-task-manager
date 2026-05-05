@@ -1,0 +1,166 @@
+<div class="container py-4">
+  <a routerLink="/projects" class="btn btn-link mb-3"><i class="bi bi-arrow-left"></i> Back to Projects</a>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div *ngIf="project && !loading">
+    <!-- Project Header -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h2 class="mb-1">{{ project.name }}</h2>
+            <p class="text-muted mb-2">{{ project.description || 'No description' }}</p>
+            <span class="badge bg-info">Your Role: {{ project.myRole }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Members Section -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-people"></i> Members ({{ members.length }})</h5>
+            <button *ngIf="isAdmin()" class="btn btn-sm btn-primary" (click)="openAddMember()">
+              <i class="bi bi-plus"></i> Add
+            </button>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li *ngFor="let m of members" class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ m.name }}</strong><br>
+                <small class="text-muted">{{ m.email }}</small><br>
+                <span class="badge" [class.bg-danger]="m.role === 'ADMIN'" [class.bg-info]="m.role === 'MEMBER'">{{ m.role }}</span>
+              </div>
+              <button *ngIf="isAdmin() && m.role !== 'ADMIN'"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeMember(m.userId)">
+                <i class="bi bi-x"></i>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tasks Section -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-list-check"></i> Tasks ({{ tasks.length }})</h5>
+            <button *ngIf="isAdmin()" class="btn btn-sm btn-primary" (click)="openTaskModal()">
+              <i class="bi bi-plus"></i> New Task
+            </button>
+          </div>
+          <div class="card-body">
+            <div *ngIf="tasks.length === 0" class="text-center py-4 text-muted">
+              No tasks yet.
+            </div>
+            <div *ngFor="let t of tasks" class="task-item border rounded p-3 mb-2"
+                 [class.overdue]="isOverdue(t)">
+              <div class="d-flex justify-content-between">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">
+                    {{ t.title }}
+                    <span class="badge ms-2" [ngClass]="getStatusBadge(t.status)">{{ t.status }}</span>
+                    <span class="badge ms-1" [ngClass]="getPriorityBadge(t.priority)">{{ t.priority }}</span>
+                    <span *ngIf="isOverdue(t)" class="badge bg-danger ms-1">OVERDUE</span>
+                  </h6>
+                  <p class="small text-muted mb-1">{{ t.description }}</p>
+                  <small class="text-muted">
+                    <i class="bi bi-calendar"></i> {{ t.dueDate || 'No due date' }} |
+                    <i class="bi bi-person"></i> {{ t.assignedToName || 'Unassigned' }}
+                  </small>
+                </div>
+                <div>
+                  <select class="form-select form-select-sm mb-1"
+                          [value]="t.status"
+                          (change)="updateStatus(t, $any($event.target).value)">
+                    <option value="TODO">To Do</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="DONE">Done</option>
+                  </select>
+                  <div *ngIf="isAdmin()" class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" (click)="openTaskModal(t)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" (click)="deleteTask(t.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal-backdrop-custom" *ngIf="showMemberModal" (click)="closeAddMember()"></div>
+<div class="modal-custom" *ngIf="showMemberModal">
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white"><h5 class="mb-0">Add Member</h5></div>
+    <div class="card-body">
+      <label class="form-label">User Email</label>
+      <input type="email" class="form-control" [(ngModel)]="newMemberEmail" placeholder="user@example.com">
+      <small class="text-muted">User must be already registered.</small>
+    </div>
+    <div class="card-footer text-end">
+      <button class="btn btn-secondary me-2" (click)="closeAddMember()">Cancel</button>
+      <button class="btn btn-primary" (click)="addMember()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal-backdrop-custom" *ngIf="showTaskModal" (click)="closeTaskModal()"></div>
+<div class="modal-custom" *ngIf="showTaskModal">
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">{{ editingTaskId ? 'Edit Task' : 'New Task' }}</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Title *</label>
+        <input type="text" class="form-control" [(ngModel)]="taskForm.title">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" [(ngModel)]="taskForm.description" rows="2"></textarea>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Due Date</label>
+          <input type="date" class="form-control" [(ngModel)]="taskForm.dueDate">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Priority</label>
+          <select class="form-select" [(ngModel)]="taskForm.priority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+          </select>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Assign To</label>
+        <select class="form-select" [(ngModel)]="taskForm.assignedToUserId">
+          <option [ngValue]="null">-- Unassigned --</option>
+          <option *ngFor="let m of members" [ngValue]="m.userId">{{ m.name }} ({{ m.email }})</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-footer text-end">
+      <button class="btn btn-secondary me-2" (click)="closeTaskModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveTask()">
+        {{ editingTaskId ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>

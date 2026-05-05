@@ -1,0 +1,51 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-list-check"></i> My Tasks</h2>
+    <select class="form-select w-auto" [(ngModel)]="filterStatus">
+      <option value="ALL">All ({{ tasks.length }})</option>
+      <option value="TODO">To Do</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="DONE">Done</option>
+      <option value="OVERDUE">Overdue</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div *ngIf="!loading && filteredTasks.length === 0" class="text-center py-5 text-muted">
+    <i class="bi bi-check2-circle" style="font-size: 4rem;"></i>
+    <p class="mt-3">No tasks here!</p>
+  </div>
+
+  <div *ngFor="let t of filteredTasks" class="card shadow-sm mb-3" [class.overdue]="isOverdue(t)">
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <div class="flex-grow-1">
+          <h5 class="mb-1">
+            {{ t.title }}
+            <span class="badge ms-2" [ngClass]="getStatusBadge(t.status)">{{ t.status }}</span>
+            <span class="badge ms-1" [ngClass]="getPriorityBadge(t.priority)">{{ t.priority }}</span>
+            <span *ngIf="isOverdue(t)" class="badge bg-danger ms-1">OVERDUE</span>
+          </h5>
+          <p class="text-muted mb-1">{{ t.description || 'No description' }}</p>
+          <small class="text-muted">
+            <i class="bi bi-folder"></i>
+            <a [routerLink]="['/projects', t.projectId]">{{ t.projectName }}</a> |
+            <i class="bi bi-calendar"></i> {{ t.dueDate || 'No due date' }}
+          </small>
+        </div>
+        <div>
+          <select class="form-select form-select-sm"
+                  [value]="t.status"
+                  (change)="updateStatus(t, $any($event.target).value)">
+            <option value="TODO">To Do</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

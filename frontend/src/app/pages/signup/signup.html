@@ -1,0 +1,26 @@
+<div class="d-flex align-items-center justify-content-center vh-100">
+  <div class="card shadow-lg p-4" style="width: 400px;">
+    <h2 class="text-center text-primary mb-4"><i class="bi bi-person-plus"></i> Sign Up</h2>
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+    <form (ngSubmit)="signup()">
+      <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-control" [(ngModel)]="name" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" [(ngModel)]="email" name="email" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" [(ngModel)]="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100" [disabled]="loading">
+        {{ loading ? 'Loading...' : 'Sign Up' }}
+      </button>
+      <p class="text-center mt-3 mb-0">
+        Already have an account? <a routerLink="/login">Login</a>
+      </p>
+    </form>
+  </div>
+</div>

@@ -61,6 +61,15 @@ public class TaskService {
         return toResponse(task);
     }
 
+    public TaskResponse getOne(Long id) {
+        User me = currentUser.get();
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+        memberRepository.findByProjectAndUser(task.getProject(), me)
+                .orElseThrow(() -> new UnauthorizedException("Not a project member"));
+        return toResponse(task);
+    }
+
     public List<TaskResponse> getProjectTasks(Long projectId) {
         User me = currentUser.get();
         Project project = projectRepository.findById(projectId)

@@ -1,0 +1,12 @@
+.task-item { transition: all 0.2s; }
+.task-item:hover { background: #f8f9fa; }
+.task-item.overdue { border-left: 4px solid #dc3545 !important; background: #fff5f5; }
+
+.modal-backdrop-custom {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 1040;
+}
+.modal-custom {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  z-index: 1050; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+}

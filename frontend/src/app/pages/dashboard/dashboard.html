@@ -1,0 +1,75 @@
+<div class="container py-4">
+  <h2 class="mb-4">
+    <i class="bi bi-speedometer2"></i> Welcome, {{ user?.name }}!
+  </h2>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="stats && !loading">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-white bg-primary shadow-sm">
+          <div class="card-body">
+            <h6><i class="bi bi-list-task"></i> Total Tasks</h6>
+            <h2>{{ stats.totalTasks }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-white bg-secondary shadow-sm">
+          <div class="card-body">
+            <h6><i class="bi bi-clipboard"></i> To Do</h6>
+            <h2>{{ stats.todoCount }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-white bg-warning shadow-sm">
+          <div class="card-body">
+            <h6><i class="bi bi-hourglass-split"></i> In Progress</h6>
+            <h2>{{ stats.inProgressCount }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="card text-white bg-success shadow-sm">
+          <div class="card-body">
+            <h6><i class="bi bi-check-circle"></i> Done</h6>
+            <h2>{{ stats.doneCount }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overdue Alert -->
+    <div *ngIf="stats.overdueCount > 0" class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <strong>{{ stats.overdueCount }}</strong> overdue task(s)! Please review them.
+    </div>
+
+    <!-- Tasks Per User -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-people"></i> Tasks Per User</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="userKeys.length === 0" class="text-muted">No tasks assigned yet.</div>
+        <div *ngFor="let name of userKeys" class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span><strong>{{ name }}</strong></span>
+            <span class="badge bg-primary">{{ getUserCount(name) }} tasks</span>
+          </div>
+          <div class="progress" style="height: 10px;">
+            <div class="progress-bar bg-primary"
+                 [style.width.%]="(getUserCount(name) / stats.totalTasks) * 100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
